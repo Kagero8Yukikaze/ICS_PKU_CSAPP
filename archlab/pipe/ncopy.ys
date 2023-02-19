@@ -1,0 +1,161 @@
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Describe how and why you modified the baseline code.
+# 
+################ Description ########################
+#
+# use iaddq instead of addq
+# delete redundant judgment
+# use loop unrolling 
+# copy 8 word_t in one turn
+# hazard may occur when mrmovq and rmmovq are adjacent to each other, so separate them
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+	iaddq $-8, %rdx				# if len<8, no need to go to Loop8
+	jl test8
+
+Loop8:
+	mrmovq 0(%rdi), %r8
+	mrmovq 8(%rdi), %r9
+	mrmovq 16(%rdi), %r10
+	mrmovq 24(%rdi), %r11
+	mrmovq 32(%rdi), %r12
+	mrmovq 40(%rdi), %r13
+	mrmovq 48(%rdi), %r14
+	mrmovq 56(%rdi), %rbx
+
+	rmmovq %r8, 0(%rsi)
+	rmmovq %r9, 8(%rsi)
+	rmmovq %r10, 16(%rsi)
+	rmmovq %r11, 24(%rsi)
+	rmmovq %r12, 32(%rsi)
+	rmmovq %r13, 40(%rsi)
+	rmmovq %r14, 48(%rsi)
+	rmmovq %rbx, 56(%rsi)
+
+judge0:
+	andq %r8, %r8
+	jle judge1
+	iaddq $1, %rax
+judge1:
+	andq %r9, %r9
+	jle judge2
+	iaddq $1, %rax
+judge2:
+	andq %r10, %r10
+	jle judge3
+	iaddq $1, %rax
+judge3:
+	andq %r11, %r11
+	jle judge4
+	iaddq $1, %rax
+judge4:
+	andq %r12, %r12
+	jle judge5
+	iaddq $1, %rax
+judge5:
+	andq %r13, %r13
+	jle judge6
+	iaddq $1, %rax
+judge6:
+	andq %r14, %r14
+	jle judge7
+	iaddq $1, %rax
+judge7:
+	andq %rbx, %rbx
+	jle step8
+	iaddq $1, %rax
+
+step8:
+	iaddq $64,%rdi
+	iaddq $64,%rsi
+	iaddq $-8, %rdx
+	jge Loop8 
+test8:
+	mrmovq (%rdi), %r8			# separate mrmovq and rmmovq to avoid hazard
+	iaddq $5, %rdx
+	jge GreatOrEqual3			# whether len >= 3
+	iaddq $2, %rdx				# len = 0 or 1 or 2  while %rdx = -1 or 0 or 1
+	jl Done						# len = 0
+	rmmovq %r8, (%rsi)
+	je Equal1					# len = 1
+	jmp Equal2					# len = 2
+
+GreatOrEqual3:
+	rmmovq %r8, (%rsi)
+	je Equal3
+	iaddq $-2, %rdx				# len = 4 or 5 or 6 or 7  while %rdx = -1 or 0 or 1 or 2
+	jl Equal4
+	je Equal5
+Great5:
+	iaddq $-2, %rdx				# len = 6 or 7  while %rdx = -1 or 0
+	jl Equal6
+
+Equal7:
+	andq %r8, %r8
+	mrmovq 48(%rdi), %r8	
+	jle Equal7sub
+	iaddq $1, %rax
+Equal7sub:
+	rmmovq %r8, 48(%rsi)
+Equal6:
+	andq %r8, %r8
+	mrmovq 40(%rdi), %r8	
+	jle Equal6sub
+	iaddq $1, %rax
+Equal6sub:
+	rmmovq %r8, 40(%rsi)
+Equal5:
+	andq %r8, %r8
+	mrmovq 32(%rdi), %r8	
+	jle Equal5sub
+	iaddq $1, %rax
+Equal5sub:
+	rmmovq %r8, 32(%rsi)
+Equal4:
+	andq %r8, %r8
+	mrmovq 24(%rdi), %r8	
+	jle Equal4sub
+	iaddq $1, %rax
+Equal4sub:
+	rmmovq %r8, 24(%rsi)
+Equal3:
+	andq %r8, %r8
+	mrmovq 16(%rdi), %r8	
+	jle Equal3sub
+	iaddq $1, %rax
+Equal3sub:
+	rmmovq %r8, 16(%rsi)
+Equal2:
+	andq %r8, %r8
+	mrmovq 8(%rdi), %r8	
+	jle Equal2sub
+	iaddq $1, %rax
+Equal2sub:
+	rmmovq %r8, 8(%rsi)
+Equal1:
+	andq %r8, %r8
+	mrmovq (%rdi), %r8	
+	jle Done
+	iaddq $1, %rax
+
+
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */

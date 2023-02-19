@@ -1,0 +1,6 @@
+phase1 : It is so nice to de-stress.
+phase2 : 0 1 1 3 5 11
+phase3 : 6 w 288
+phase4 : 4 8
+phase5 : NNNSPQ
+phase6 : 2 5 4 3 6 1

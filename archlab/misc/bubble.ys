@@ -1,0 +1,71 @@
+# Execution begins at address 0 
+	.pos 0
+	irmovq stack, %rsp  	# Set up stack pointer
+	call main		# Execute main program
+	halt			# Terminate program 
+
+# Array of some elements
+.align 8
+Array:
+    .quad 0xbca
+    .quad 0xcba
+    .quad 0xacb
+    .quad 0xcab
+    .quad 0xabc
+    .quad 0xbac
+#end
+
+main:	
+    irmovq Array,%rdi
+    irmovq $6,%rsi
+	call bubble_sort	
+	ret
+
+# void bubble_sort(long *data, long count)
+# data in %rdi, count in %rsi
+bubble_sort:
+    irmovq $8,%r8
+    rrmovq %rdi,%rax
+    irmovq $1,%r10
+    rrmovq %rsi,%r9
+    subq %r10,%r9       # count--
+    andq %r9,%r9        # while(count>0)
+    jmp test1
+imul:
+    addq %r8,%rax
+    subq %r10,%r9
+test1:
+    jne imul
+    addq %rax,%rsi      # %rsi=data+count-1=last 
+    jmp test2
+loop1:  
+    addq %rdi,%rsi
+    rrmovq %rdi,%rax    # i=data
+    subq %rax,%rsi      # %rax=i
+    jmp test3
+loop2:
+    addq %rax,%rsi
+    mrmovq 8(%rax),%rdx
+    mrmovq (%rax),%rcx
+    subq %rcx,%rdx      # i+1<i
+    jge test4
+    addq %rcx,%rdx
+    rmmovq %rcx,8(%rax)
+    rmmovq %rdx,(%rax)
+test4:
+    addq %r8,%rax
+    subq %rax,%rsi
+test3:
+    jg loop2
+    addq %rax,%rsi
+    subq %r8,%rsi
+test2:
+    subq %rdi,%rsi      # %rdi=data
+    jg loop1
+    ret
+
+
+
+# Stack starts here and grows to lower addresses
+	.pos 0x200
+stack:
